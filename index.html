@@ -1377,7 +1377,9 @@ function renderCode(lang) {
         span.textContent = t;
         lineEl.appendChild(span);
       } else {
-        lineEl.appendChild(document.createTextNode(t));
+        const span = document.createElement('span');
+        span.textContent = t;
+        lineEl.appendChild(span);
       }
     });
 
