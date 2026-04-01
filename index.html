@@ -1,0 +1,2042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nvim theme creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+:root {
+  --theme-bg: #1e1e2e;
+  --theme-fg: #cdd6f4;
+  --theme-cursor-line: #313244;
+  --theme-line-nr: #6c7086;
+  --theme-line-nr-active: #cdd6f4;
+  --theme-selection: #45475a;
+  --theme-border: #313244;
+  --theme-tabline-bg: #181825;
+  --theme-tabline-fg: #6c7086;
+  --theme-tabline-active-bg: #1e1e2e;
+  --theme-tabline-active-fg: #cdd6f4;
+  --theme-sl-bg: #181825;
+  --theme-sl-fg: #cdd6f4;
+  --theme-sl-mode-n: #89b4fa;
+  --theme-sl-mode-i: #a6e3a1;
+  --theme-sl-mode-v: #cba6f7;
+  --theme-sl-mode-c: #f9e2af;
+  --theme-sl-mode-t: #94e2d5;
+  --theme-sl-mode-current: var(--theme-sl-mode-n);
+  --theme-comment: #6c7086;
+  --theme-keyword: #cba6f7;
+  --theme-string: #a6e3a1;
+  --theme-function: #89b4fa;
+  --theme-type: #f9e2af;
+  --theme-constant: #fab387;
+  --theme-number: #fab387;
+  --theme-operator: #89dceb;
+  --theme-parameter: #f38ba8;
+  --theme-builtin: #89dceb;
+  --theme-special: #f5c2e7;
+  --theme-float-bg: #313244;
+  --theme-float-border: #89b4fa;
+  --theme-pmenu-sel: #45475a;
+  --theme-error: #f38ba8;
+  --theme-warning: #f9e2af;
+  --theme-info: #89b4fa;
+  --theme-hint: #94e2d5;
+
+  /* App chrome */
+  --app-bg: #0d0d0d;
+  --app-surface: #111111;
+  --app-border: #1f1f1f;
+  --app-text: #e0e0e0;
+  --app-text-muted: #555;
+  --app-accent: #4a9eff;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-ui: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--app-bg);
+  color: var(--app-text);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Header ────────────────────────────────────────────────────────────────── */
+#header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--app-surface);
+  border-bottom: 1px solid var(--app-border);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+#logo {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-text);
+  letter-spacing: 0.02em;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+#logo span { color: #89b4fa; }
+
+.header-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--app-border);
+}
+
+.preset-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.preset-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 13px;
+  border-radius: 3px;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.preset-btn:hover { border-color: #444; color: var(--app-text); background: #1a1a1a; }
+.preset-btn.active { border-color: #4a9eff55; color: #89b4fa; background: #89b4fa11; }
+
+#header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+#export-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 3px;
+  border: 1px solid #4a9eff44;
+  background: #4a9eff18;
+  color: #89b4fa;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.04em;
+}
+#export-btn:hover { background: #4a9eff30; border-color: #4a9eff88; }
+
+/* ─── Main Layout ───────────────────────────────────────────────────────────── */
+#main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#preview-pane {
+  width: 62%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 12px;
+  overflow: hidden;
+  background: var(--app-bg);
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+#controls-pane {
+  width: 38%;
+  background: var(--app-surface);
+  border-left: 1px solid var(--app-border);
+  overflow-y: auto;
+  flex-shrink: 0;
+  padding-bottom: 60px;
+}
+
+/* Custom scrollbar */
+#controls-pane::-webkit-scrollbar { width: 5px; }
+#controls-pane::-webkit-scrollbar-track { background: transparent; }
+#controls-pane::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+#controls-pane::-webkit-scrollbar-thumb:hover { background: #333; }
+
+/* ─── Neovim Editor Chrome ──────────────────────────────────────────────────── */
+#nvim-editor {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.65;
+  user-select: none;
+}
+
+/* Tabline */
+#nvim-tabline {
+  display: flex;
+  background: var(--theme-tabline-bg);
+  height: 36px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+.nvim-tab {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 14px;
+  cursor: default;
+  color: var(--theme-tabline-fg);
+  background: var(--theme-tabline-bg);
+  border-right: 1px solid var(--theme-border);
+  white-space: nowrap;
+  transition: color 0.08s, background 0.08s;
+  position: relative;
+}
+.nvim-tab.active {
+  color: var(--theme-tabline-active-fg);
+  background: var(--theme-tabline-active-bg);
+  /* top accent bar instead of bottom border hack */
+  box-shadow: inset 0 2px 0 var(--theme-sl-mode-current);
+}
+.tab-spacer { flex: 1; background: var(--theme-tabline-bg); border-bottom: 1px solid var(--theme-border); }
+#nvim-body { border-top: 1px solid var(--theme-border); }
+
+/* Editor body */
+#nvim-body {
+  background: var(--theme-bg);
+  display: flex;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Gutter */
+#nvim-gutter {
+  width: 52px;
+  flex-shrink: 0;
+  background: var(--theme-bg);
+  border-right: 1px solid var(--theme-border);
+  padding: 0 10px;
+  display: flex;
+  flex-direction: column;
+}
+.line-nr {
+  color: var(--theme-line-nr);
+  text-align: right;
+  font-size: 14px;
+  line-height: 1.65;
+  transition: color 0.08s;
+  min-height: 24.75px;
+}
+.line-nr.active {
+  color: var(--theme-line-nr-active);
+  background: var(--theme-cursor-line);
+  margin: 0 -10px;
+  padding: 0 10px;
+}
+
+/* Code area */
+#nvim-code {
+  flex: 1;
+  padding: 0 18px;
+  overflow: hidden;
+  position: relative;
+  align-self: stretch;
+}
+
+.code-line {
+  display: flex;
+  align-items: baseline;
+  min-height: 24.75px;
+  white-space: pre;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--theme-fg);
+}
+.code-line.cursor-line { background: var(--theme-cursor-line); margin: 0 -18px; padding: 0 18px; }
+.code-line.visual-line  { background: var(--theme-selection);  margin: 0 -18px; padding: 0 18px; transition: background 0.08s; }
+.line-nr.visual { color: var(--theme-line-nr-active); background: var(--theme-selection); margin: 0 -10px; padding: 0 10px; transition: background 0.08s; }
+
+/* Syntax token spans */
+.syn-keyword  { color: var(--theme-keyword);   transition: color 0.08s; }
+.syn-string   { color: var(--theme-string);    transition: color 0.08s; }
+.syn-comment  { color: var(--theme-comment);   font-style: italic; transition: color 0.08s; }
+.syn-function { color: var(--theme-function);  transition: color 0.08s; }
+.syn-type     { color: var(--theme-type);      transition: color 0.08s; }
+.syn-constant { color: var(--theme-constant);  transition: color 0.08s; }
+.syn-number   { color: var(--theme-number);    transition: color 0.08s; }
+.syn-operator { color: var(--theme-operator);  transition: color 0.08s; }
+.syn-parameter{ color: var(--theme-parameter); transition: color 0.08s; }
+.syn-builtin  { color: var(--theme-builtin);   transition: color 0.08s; }
+.syn-special  { color: var(--theme-special);   transition: color 0.08s; }
+.syn-punct    { color: var(--theme-fg);        opacity: 0.7; transition: color 0.08s; }
+.syn-variable { color: var(--theme-fg);        transition: color 0.08s; }
+.syn-plain    { color: var(--theme-fg);        transition: color 0.08s; }
+
+/* Floating pmenu */
+#nvim-pmenu {
+  position: absolute;
+  top: calc(24.75px * 7);
+  right: 16px;
+  background: var(--theme-float-bg);
+  border: 1px solid var(--theme-float-border);
+  border-radius: 2px;
+  width: 260px;
+  z-index: 5;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  font-size: 14px;
+  transition: background 0.08s, border-color 0.08s;
+}
+.pmenu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 10px;
+  border-bottom: 1px solid var(--theme-float-border);
+  opacity: 0.6;
+  font-size: 12px;
+  color: var(--theme-float-border);
+}
+.pmenu-item {
+  display: flex;
+  align-items: center;
+  padding: 3px 10px;
+  color: var(--theme-fg);
+  gap: 10px;
+  cursor: default;
+  transition: background 0.08s;
+}
+.pmenu-item.selected { background: var(--theme-pmenu-sel); }
+.pmenu-item-kind {
+  font-size: 12px;
+  opacity: 0.55;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.pmenu-item-text { flex: 1; }
+.pmenu-item-type { font-size: 12px; opacity: 0.4; color: var(--theme-type); }
+
+/* Statusline */
+#nvim-statusline {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  background: var(--theme-sl-bg);
+  color: var(--theme-sl-fg);
+  font-size: 13px;
+  border-top: 1px solid var(--theme-border);
+  transition: background 0.08s, color 0.08s;
+}
+.sl-mode {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 12px;
+  background: var(--theme-sl-mode-current);
+  color: var(--theme-sl-bg);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  transition: background 0.08s;
+}
+.sl-filename { padding: 0 10px; opacity: 0.9; }
+.sl-git { padding: 0 8px; opacity: 0.6; font-size: 12px; }
+.sl-sep { opacity: 0.25; }
+.sl-right { margin-left: auto; display: flex; align-items: center; gap: 0; }
+.sl-filetype { padding: 0 10px; opacity: 0.7; }
+.sl-pos { padding: 0 10px; }
+.sl-pct { padding: 0 10px; background: var(--theme-sl-mode-current); color: var(--theme-sl-bg); height: 100%; display: flex; align-items: center; font-weight: 600; transition: background 0.08s; }
+
+/* Preview toolbar (mode + lang tabs) */
+#preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  width: 100%;
+  gap: 8px;
+}
+
+/* Mode tabs */
+#mode-tabs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.mode-tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid #222;
+  background: transparent;
+  color: #444;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  transition: all 0.1s ease;
+}
+.mode-tab:hover { color: #888; border-color: #333; }
+.mode-tab.active { border-color: currentColor; opacity: 1; }
+.mode-tab[data-mode="n"].active  { color: var(--theme-sl-mode-n); border-color: var(--theme-sl-mode-n); background: color-mix(in srgb, var(--theme-sl-mode-n) 12%, transparent); }
+.mode-tab[data-mode="i"].active  { color: var(--theme-sl-mode-i); border-color: var(--theme-sl-mode-i); background: color-mix(in srgb, var(--theme-sl-mode-i) 12%, transparent); }
+.mode-tab[data-mode="v"].active  { color: var(--theme-sl-mode-v); border-color: var(--theme-sl-mode-v); background: color-mix(in srgb, var(--theme-sl-mode-v) 12%, transparent); }
+.mode-tab[data-mode="c"].active  { color: var(--theme-sl-mode-c); border-color: var(--theme-sl-mode-c); background: color-mix(in srgb, var(--theme-sl-mode-c) 12%, transparent); }
+.mode-tab[data-mode="t"].active  { color: var(--theme-sl-mode-t); border-color: var(--theme-sl-mode-t); background: color-mix(in srgb, var(--theme-sl-mode-t) 12%, transparent); }
+
+/* Language tabs */
+#lang-tabs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.lang-tab {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: 1px solid #222;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  letter-spacing: 0.02em;
+}
+.lang-tab:hover { color: #888; border-color: #333; }
+.lang-tab.active { color: #89b4fa; border-color: #89b4fa44; background: #89b4fa0d; }
+
+/* ─── Controls Panel ────────────────────────────────────────────────────────── */
+#controls-header {
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--app-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.ctrl-section {
+  border-bottom: 1px solid var(--app-border);
+}
+
+.ctrl-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 24px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.ctrl-section-header:hover { background: #161616; }
+
+.ctrl-section-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #777;
+  flex: 1;
+}
+
+.ctrl-section-arrow {
+  font-size: 12px;
+  color: #444;
+  transition: transform 0.15s;
+  font-family: var(--font-mono);
+}
+.ctrl-section.open .ctrl-section-arrow { transform: rotate(90deg); }
+.ctrl-section.open .ctrl-section-title { color: #aaa; }
+
+.ctrl-section-body {
+  display: none;
+  padding: 6px 24px 18px;
+}
+.ctrl-section.open .ctrl-section-body { display: block; }
+
+/* Color row */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #161616;
+}
+.color-row:last-child { border-bottom: none; }
+
+.color-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+  width: 120px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+.color-swatch-wrap { position: relative; flex-shrink: 0; }
+.color-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 5px;
+  border: 1px solid rgba(255,255,255,0.12);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  display: block;
+}
+.color-swatch:hover { transform: scale(1.08); box-shadow: 0 0 0 3px rgba(255,255,255,0.12); }
+.color-input-hidden {
+  position: absolute;
+  top: 0; left: 0;
+  width: 0; height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hex-input {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  width: 80px;
+  padding: 5px 9px;
+  background: #0a0a0a;
+  border: 1px solid #272727;
+  border-radius: 4px;
+  color: #ddd;
+  outline: none;
+  transition: border-color 0.1s;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.hex-input:focus { border-color: #4a9eff66; color: #fff; }
+
+.hsl-toggle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid #252525;
+  background: transparent;
+  color: #4a4a4a;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  transition: all 0.1s;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.hsl-toggle:hover { color: #888; border-color: #383838; }
+.hsl-toggle.active { color: #89b4fa; border-color: #89b4fa55; background: #89b4fa0f; }
+
+/* HSL sliders */
+.hsl-panel {
+  display: none;
+  padding: 8px 0 4px 178px;
+  flex-direction: column;
+  gap: 8px;
+}
+.hsl-panel.open { display: flex; }
+
+.hsl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hsl-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: #4a4a4a;
+  width: 14px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.hsl-slider {
+  flex: 1;
+  height: 10px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  border: none;
+}
+.hsl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  cursor: pointer;
+}
+.hsl-slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0,0,0,0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  cursor: pointer;
+}
+.hsl-value {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: #555;
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.color-row-wrap { }
+
+/* ─── Export Modal ──────────────────────────────────────────────────────────── */
+#modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+#modal-backdrop.open { display: flex; }
+
+#export-modal {
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  width: 620px;
+  max-width: 95vw;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #1d1d1d;
+}
+.modal-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: #ccc;
+  letter-spacing: 0.05em;
+}
+.modal-close {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.1s;
+}
+.modal-close:hover { color: #ccc; }
+
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid #1d1d1d;
+  padding: 0 18px;
+  gap: 0;
+}
+.modal-tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.12s;
+}
+.modal-tab:hover { color: #999; }
+.modal-tab.active { color: #89b4fa; border-bottom-color: #89b4fa; }
+
+.modal-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
+  gap: 12px;
+}
+
+.export-output {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.65;
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  padding: 14px 16px;
+  color: #ccc;
+  overflow-y: auto;
+  white-space: pre;
+  min-height: 300px;
+  max-height: 440px;
+  resize: none;
+  outline: none;
+}
+.export-output::-webkit-scrollbar { width: 4px; }
+.export-output::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px 16px;
+  border-top: 1px solid #1a1a1a;
+}
+.copy-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 18px;
+  border-radius: 3px;
+  border: 1px solid #4a9eff44;
+  background: #4a9eff14;
+  color: #89b4fa;
+  cursor: pointer;
+  transition: all 0.12s;
+  letter-spacing: 0.04em;
+}
+.copy-btn:hover { background: #4a9eff28; border-color: #4a9eff77; }
+.copy-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #333;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  body { overflow: auto; height: auto; }
+  #main { flex-direction: column; overflow: visible; height: auto; }
+  #preview-pane { width: 100%; flex-shrink: initial; height: 60vh; padding: 12px; }
+  #controls-pane { width: 100%; flex-shrink: initial; border-left: none; border-top: 1px solid var(--app-border); }
+  .hsl-panel { padding-left: 0; }
+}
+
+/* ─── Transitions for preset switching ─────────────────────────────────────── */
+.syn-keyword, .syn-string, .syn-comment, .syn-function, .syn-type,
+.syn-constant, .syn-number, .syn-operator, .syn-parameter, .syn-builtin,
+.syn-special, .syn-punct, .syn-variable, .syn-plain {
+  transition: color 0.08s ease;
+}
+
+/* Subtle scan-line overlay on the editor for depth */
+#nvim-editor::after {
+  content: '';
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1px,
+    rgba(0,0,0,0.015) 1px,
+    rgba(0,0,0,0.015) 2px
+  );
+  border-radius: 6px;
+  z-index: 1;
+}
+#nvim-editor { position: relative; }
+
+/* Diagnostic gutter indicators */
+.diag-error::after   { content: '●'; color: var(--theme-error); font-size: 8px; margin-left: 2px; }
+.diag-warning::after { content: '●'; color: var(--theme-warning); font-size: 8px; margin-left: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─────────────────────────────────────────────────────────────── -->
+<header id="header">
+  <div id="logo"><span>▍</span>nvim theme creator</div>
+  <div class="header-divider"></div>
+  <span class="preset-label">Presets:</span>
+  <button class="preset-btn active" data-preset="catppuccin">Catppuccin</button>
+  <button class="preset-btn" data-preset="gruvbox">Gruvbox</button>
+  <button class="preset-btn" data-preset="tokyonight">TokyoNight</button>
+  <div id="header-right">
+    <button id="export-btn">Export ↗</button>
+  </div>
+</header>
+
+<!-- ─── Main ───────────────────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- Left: Neovim preview -->
+  <div id="preview-pane">
+    <div id="nvim-editor">
+      <!-- Tabline -->
+      <div id="nvim-tabline">
+        <div class="nvim-tab active">init.lua</div>
+        <div class="nvim-tab">utils.lua</div>
+        <div class="nvim-tab">config.lua</div>
+        <div class="tab-spacer"></div>
+      </div>
+      <!-- Body -->
+      <div id="nvim-body">
+        <!-- Gutter -->
+        <div id="nvim-gutter" aria-hidden="true"></div>
+        <!-- Code -->
+        <div id="nvim-code"></div>
+        <!-- Pmenu -->
+        <div id="nvim-pmenu">
+          <div class="pmenu-header"><span>suggestion</span><span>5/32</span></div>
+          <div class="pmenu-item selected">
+            <span class="pmenu-item-kind">ƒ</span>
+            <span class="pmenu-item-text">setup</span>
+            <span class="pmenu-item-type">function</span>
+          </div>
+          <div class="pmenu-item">
+            <span class="pmenu-item-kind">v</span>
+            <span class="pmenu-item-text">set_hl</span>
+            <span class="pmenu-item-type">method</span>
+          </div>
+          <div class="pmenu-item">
+            <span class="pmenu-item-kind">v</span>
+            <span class="pmenu-item-text">set_keymap</span>
+            <span class="pmenu-item-type">method</span>
+          </div>
+          <div class="pmenu-item">
+            <span class="pmenu-item-kind">m</span>
+            <span class="pmenu-item-text">nvim_buf_set_lines</span>
+            <span class="pmenu-item-type">method</span>
+          </div>
+          <div class="pmenu-item">
+            <span class="pmenu-item-kind">c</span>
+            <span class="pmenu-item-text">nvim_create_augroup</span>
+            <span class="pmenu-item-type">method</span>
+          </div>
+        </div>
+      </div>
+      <!-- Statusline -->
+      <div id="nvim-statusline">
+        <div class="sl-mode">NORMAL</div>
+        <div class="sl-filename">init.lua</div>
+        <div class="sl-git"> main</div>
+        <div class="sl-right">
+          <span class="sl-sep">│</span>
+          <span class="sl-filetype">lua</span>
+          <span class="sl-sep">│</span>
+          <span class="sl-pos">5:1</span>
+          <span class="sl-pct">28%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar: mode + language tabs -->
+    <div id="preview-toolbar">
+      <div id="mode-tabs">
+        <button class="mode-tab active" data-mode="n">NORMAL</button>
+        <button class="mode-tab" data-mode="i">INSERT</button>
+        <button class="mode-tab" data-mode="v">VISUAL</button>
+        <button class="mode-tab" data-mode="c">COMMAND</button>
+        <button class="mode-tab" data-mode="t">TERMINAL</button>
+      </div>
+      <div id="lang-tabs">
+        <button class="lang-tab active" data-lang="lua">[lua]</button>
+        <button class="lang-tab" data-lang="python">[python]</button>
+        <button class="lang-tab" data-lang="javascript">[javascript]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Controls -->
+  <div id="controls-pane">
+    <div id="controls-header">Color Groups</div>
+    <div id="controls-body"></div>
+  </div>
+</div>
+
+<!-- ─── Export Modal ───────────────────────────────────────────────────────── -->
+<div id="modal-backdrop">
+  <div id="export-modal">
+    <div class="modal-header">
+      <span class="modal-title">Export Theme</span>
+      <button class="modal-close" id="modal-close-btn">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-export="lua">Lua colorscheme</button>
+      <button class="modal-tab" data-export="lualine">Lualine theme</button>
+      <button class="modal-tab" data-export="vim">VimScript</button>
+    </div>
+    <div class="modal-body">
+      <textarea class="export-output" id="export-output" readonly spellcheck="false"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="copy-btn" id="copy-btn">Copy to clipboard</button>
+      <span class="copy-hint" id="copy-hint">~/.config/nvim/colors/mytheme.lua</span>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+// ─── Palette Presets ──────────────────────────────────────────────────────────
+const PALETTE_PRESETS = {
+  catppuccin: {
+    bg: '#1e1e2e', fg: '#cdd6f4', 'cursor-line': '#313244',
+    'line-nr': '#6c7086', 'line-nr-active': '#cdd6f4',
+    selection: '#45475a', border: '#313244',
+    'tabline-bg': '#181825', 'tabline-fg': '#6c7086',
+    'tabline-active-bg': '#1e1e2e', 'tabline-active-fg': '#cdd6f4',
+    'sl-bg': '#181825', 'sl-fg': '#cdd6f4',
+    'sl-mode-n': '#89b4fa', 'sl-mode-i': '#a6e3a1', 'sl-mode-v': '#cba6f7', 'sl-mode-c': '#f9e2af', 'sl-mode-t': '#94e2d5',
+    comment: '#6c7086', keyword: '#cba6f7', string: '#a6e3a1',
+    function: '#89b4fa', type: '#f9e2af', constant: '#fab387',
+    number: '#fab387', operator: '#89dceb', parameter: '#f38ba8',
+    builtin: '#89dceb', special: '#f5c2e7',
+    'float-bg': '#313244', 'float-border': '#89b4fa',
+    'pmenu-sel': '#45475a',
+    error: '#f38ba8', warning: '#f9e2af', info: '#89b4fa', hint: '#94e2d5'
+  },
+  gruvbox: {
+    bg: '#282828', fg: '#ebdbb2', 'cursor-line': '#3c3836',
+    'line-nr': '#928374', 'line-nr-active': '#ebdbb2',
+    selection: '#504945', border: '#3c3836',
+    'tabline-bg': '#1d2021', 'tabline-fg': '#928374',
+    'tabline-active-bg': '#282828', 'tabline-active-fg': '#ebdbb2',
+    'sl-bg': '#1d2021', 'sl-fg': '#ebdbb2',
+    'sl-mode-n': '#83a598', 'sl-mode-i': '#b8bb26', 'sl-mode-v': '#d3869b', 'sl-mode-c': '#fabd2f', 'sl-mode-t': '#8ec07c',
+    comment: '#928374', keyword: '#fb4934', string: '#b8bb26',
+    function: '#83a598', type: '#fabd2f', constant: '#d3869b',
+    number: '#d3869b', operator: '#8ec07c', parameter: '#fe8019',
+    builtin: '#8ec07c', special: '#d3869b',
+    'float-bg': '#3c3836', 'float-border': '#83a598',
+    'pmenu-sel': '#504945',
+    error: '#fb4934', warning: '#fabd2f', info: '#83a598', hint: '#8ec07c'
+  },
+  tokyonight: {
+    bg: '#24283b', fg: '#c0caf5', 'cursor-line': '#292e42',
+    'line-nr': '#3b4261', 'line-nr-active': '#737aa2',
+    selection: '#2e3c64', border: '#29355d',
+    'tabline-bg': '#1f2335', 'tabline-fg': '#3b4261',
+    'tabline-active-bg': '#24283b', 'tabline-active-fg': '#c0caf5',
+    'sl-bg': '#1f2335', 'sl-fg': '#c0caf5',
+    'sl-mode-n': '#7aa2f7', 'sl-mode-i': '#9ece6a', 'sl-mode-v': '#bb9af7', 'sl-mode-c': '#e0af68', 'sl-mode-t': '#1abc9c',
+    comment: '#565f89', keyword: '#bb9af7', string: '#9ece6a',
+    function: '#7aa2f7', type: '#e0af68', constant: '#ff9e64',
+    number: '#ff9e64', operator: '#89ddff', parameter: '#e0af68',
+    builtin: '#2ac3de', special: '#ff007c',
+    'float-bg': '#292e42', 'float-border': '#7aa2f7',
+    'pmenu-sel': '#2e3c64',
+    error: '#f7768e', warning: '#e0af68', info: '#7aa2f7', hint: '#1abc9c'
+  }
+};
+
+// ─── Syntax Groups ────────────────────────────────────────────────────────────
+const SYNTAX_GROUPS = [
+  // Editor UI
+  { varName: 'bg',              label: 'Background',       section: 'Editor UI' },
+  { varName: 'fg',              label: 'Foreground',       section: 'Editor UI' },
+  { varName: 'cursor-line',     label: 'Cursor Line',      section: 'Editor UI' },
+  { varName: 'line-nr',         label: 'Line Number',      section: 'Editor UI' },
+  { varName: 'line-nr-active',  label: 'Line Nr Active',   section: 'Editor UI' },
+  { varName: 'selection',       label: 'Selection',        section: 'Editor UI' },
+  { varName: 'border',          label: 'Border',           section: 'Editor UI' },
+  // Tabline
+  { varName: 'tabline-bg',      label: 'Tabline BG',       section: 'Tabline' },
+  { varName: 'tabline-fg',      label: 'Tabline FG',       section: 'Tabline' },
+  { varName: 'tabline-active-bg', label: 'Active Tab BG',  section: 'Tabline' },
+  { varName: 'tabline-active-fg', label: 'Active Tab FG',  section: 'Tabline' },
+  // Statusline
+  { varName: 'sl-bg',           label: 'Statusline BG',    section: 'Statusline' },
+  { varName: 'sl-fg',           label: 'Statusline FG',    section: 'Statusline' },
+  { varName: 'sl-mode-n',       label: 'Mode Normal',      section: 'Statusline' },
+  { varName: 'sl-mode-i',       label: 'Mode Insert',      section: 'Statusline' },
+  { varName: 'sl-mode-v',       label: 'Mode Visual',      section: 'Statusline' },
+  { varName: 'sl-mode-c',       label: 'Mode Command',     section: 'Statusline' },
+  { varName: 'sl-mode-t',       label: 'Mode Terminal',    section: 'Statusline' },
+  // Syntax
+  { varName: 'comment',         label: 'Comment',          section: 'Syntax' },
+  { varName: 'keyword',         label: 'Keyword',          section: 'Syntax' },
+  { varName: 'string',          label: 'String',           section: 'Syntax' },
+  { varName: 'function',        label: 'Function',         section: 'Syntax' },
+  { varName: 'type',            label: 'Type',             section: 'Syntax' },
+  { varName: 'constant',        label: 'Constant',         section: 'Syntax' },
+  { varName: 'number',          label: 'Number',           section: 'Syntax' },
+  { varName: 'operator',        label: 'Operator',         section: 'Syntax' },
+  { varName: 'parameter',       label: 'Parameter',        section: 'Syntax' },
+  { varName: 'builtin',         label: 'Builtin',          section: 'Syntax' },
+  { varName: 'special',         label: 'Special',          section: 'Syntax' },
+  // Popups
+  { varName: 'float-bg',        label: 'Float BG',         section: 'Popups' },
+  { varName: 'float-border',    label: 'Float Border',     section: 'Popups' },
+  { varName: 'pmenu-sel',       label: 'Pmenu Selected',   section: 'Popups' },
+  // Diagnostics
+  { varName: 'error',           label: 'Error',            section: 'Diagnostics' },
+  { varName: 'warning',         label: 'Warning',          section: 'Diagnostics' },
+  { varName: 'info',            label: 'Info',             section: 'Diagnostics' },
+  { varName: 'hint',            label: 'Hint',             section: 'Diagnostics' },
+];
+
+// ─── Code Samples ─────────────────────────────────────────────────────────────
+// Each line is an array of {text, cls} tokens. cls matches .syn-* classes.
+const SAMPLE_CODE = {
+  lua: [
+    [ {t:'local',c:'syn-keyword'}, {t:' M ',c:'syn-variable'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'{',c:'syn-punct'}, {t:'}',c:'syn-punct'} ],
+    [ {t:'-- Configuration module',c:'syn-comment'} ],
+    [ {t:'local',c:'syn-keyword'}, {t:' default_config ',c:'syn-variable'}, {t:'=',c:'syn-operator'}, {t:' {',c:'syn-punct'} ],
+    [ {t:'  theme ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'"catppuccin"',c:'syn-string'}, {t:',',c:'syn-punct'} ],
+    [ {t:'  transparent ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'false',c:'syn-constant'}, {t:',',c:'syn-punct'} ],
+    [ {t:'}',c:'syn-punct'} ],
+    [ {t:'',c:''} ],
+    [ {t:'local',c:'syn-keyword'}, {t:' ',c:''}, {t:'function',c:'syn-keyword'}, {t:' ',c:''}, {t:'setup',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'opts',c:'syn-parameter'}, {t:')',c:'syn-punct'} ],
+    [ {t:'  opts ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'vim',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'tbl_deep_extend',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'"force"',c:'syn-string'}, {t:', default_config, ',c:'syn-plain'}, {t:'opts',c:'syn-parameter'}, {t:' ',c:''}, {t:'or',c:'syn-keyword'}, {t:' ',c:''}, {t:'{',c:'syn-punct'}, {t:'}',c:'syn-punct'}, {t:')',c:'syn-punct'} ],
+    [ {t:'  ',c:''}, {t:'if',c:'syn-keyword'}, {t:' opts',c:'syn-plain'}, {t:'.',c:'syn-punct'}, {t:'transparent ',c:'syn-plain'}, {t:'then',c:'syn-keyword'} ],
+    [ {t:'    ',c:''}, {t:'vim',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'api',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'nvim_set_hl',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'0',c:'syn-number'}, {t:', ',c:'syn-plain'}, {t:'"Normal"',c:'syn-string'}, {t:', ',c:'syn-plain'}, {t:'{',c:'syn-punct'}, {t:' bg ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'"NONE"',c:'syn-string'}, {t:' }',c:'syn-punct'}, {t:')',c:'syn-punct'} ],
+    [ {t:'  ',c:''}, {t:'end',c:'syn-keyword'} ],
+    [ {t:'  M',c:'syn-variable'}, {t:'.',c:'syn-punct'}, {t:'config ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' opts',c:'syn-plain'} ],
+    [ {t:'end',c:'syn-keyword'} ],
+    [ {t:'',c:''} ],
+    [ {t:'M',c:'syn-variable'}, {t:'.',c:'syn-punct'}, {t:'setup ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' setup',c:'syn-function'} ],
+    [ {t:'return',c:'syn-keyword'}, {t:' M',c:'syn-variable'} ],
+    [ {t:'',c:''} ],
+  ],
+  python: [
+    [ {t:'import',c:'syn-keyword'}, {t:' os',c:'syn-builtin'} ],
+    [ {t:'from',c:'syn-keyword'}, {t:' typing ',c:'syn-builtin'}, {t:'import',c:'syn-keyword'}, {t:' ',c:''}, {t:'Optional',c:'syn-type'} ],
+    [ {t:'',c:''} ],
+    [ {t:'class',c:'syn-keyword'}, {t:' ',c:''}, {t:'ThemeLoader',c:'syn-type'}, {t:':',c:'syn-punct'} ],
+    [ {t:'    ',c:''}, {t:'"""Loads Neovim colorschemes."""',c:'syn-comment'} ],
+    [ {t:'    ',c:''} ],
+    [ {t:'    DEFAULT_THEME ',c:'syn-constant'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'"catppuccin"',c:'syn-string'} ],
+    [ {t:'    ',c:''} ],
+    [ {t:'    ',c:''}, {t:'def',c:'syn-keyword'}, {t:' ',c:''}, {t:'__init__',c:'syn-special'}, {t:'(',c:'syn-punct'}, {t:'self',c:'syn-builtin'}, {t:', theme',c:'syn-parameter'}, {t:': ',c:'syn-punct'}, {t:'str',c:'syn-type'}, {t:' = DEFAULT_THEME',c:'syn-constant'}, {t:')',c:'syn-punct'}, {t:':',c:'syn-punct'} ],
+    [ {t:'        self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'theme ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' theme',c:'syn-parameter'} ],
+    [ {t:'        self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'_cache',c:'syn-variable'}, {t:': ',c:'syn-punct'}, {t:'dict',c:'syn-type'}, {t:' = ',c:'syn-plain'}, {t:'{',c:'syn-punct'}, {t:'}',c:'syn-punct'} ],
+    [ {t:'    ',c:''} ],
+    [ {t:'    ',c:''}, {t:'def',c:'syn-keyword'}, {t:' ',c:''}, {t:'load',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'self',c:'syn-builtin'}, {t:', name',c:'syn-parameter'}, {t:': ',c:'syn-punct'}, {t:'Optional',c:'syn-type'}, {t:'[',c:'syn-punct'}, {t:'str',c:'syn-type'}, {t:']',c:'syn-punct'}, {t:' = ',c:'syn-plain'}, {t:'None',c:'syn-constant'}, {t:')',c:'syn-punct'}, {t:' -> ',c:'syn-operator'}, {t:'dict',c:'syn-type'}, {t:':',c:'syn-punct'} ],
+    [ {t:'        theme ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' name ',c:'syn-parameter'}, {t:'or',c:'syn-keyword'}, {t:' self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'theme',c:'syn-plain'} ],
+    [ {t:'        ',c:''}, {t:'if',c:'syn-keyword'}, {t:' theme ',c:'syn-plain'}, {t:'not in',c:'syn-keyword'}, {t:' self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'_cache',c:'syn-variable'}, {t:':',c:'syn-punct'} ],
+    [ {t:'            path ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'os',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'path',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'join',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'"themes"',c:'syn-string'}, {t:', ',c:'syn-plain'}, {t:'f',c:'syn-special'}, {t:'"',c:'syn-string'}, {t:'{',c:'syn-punct'}, {t:'theme',c:'syn-plain'}, {t:'}',c:'syn-punct'}, {t:'.json"',c:'syn-string'}, {t:')',c:'syn-punct'} ],
+    [ {t:'            self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'_cache',c:'syn-variable'}, {t:'[theme] ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'_read',c:'syn-function'}, {t:'(path)',c:'syn-plain'} ],
+    [ {t:'        ',c:''}, {t:'return',c:'syn-keyword'}, {t:' self',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'_cache',c:'syn-variable'}, {t:'[theme]',c:'syn-plain'} ],
+  ],
+  javascript: [
+    [ {t:'import',c:'syn-keyword'}, {t:' {',c:'syn-punct'}, {t:' readFile ',c:'syn-function'}, {t:'}',c:'syn-punct'}, {t:' from ',c:'syn-plain'}, {t:"'fs/promises'",c:'syn-string'} ],
+    [ {t:'',c:''} ],
+    [ {t:'const',c:'syn-keyword'}, {t:' DEFAULT_THEME ',c:'syn-constant'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:"'catppuccin'",c:'syn-string'} ],
+    [ {t:'',c:''} ],
+    [ {t:'class',c:'syn-keyword'}, {t:' ',c:''}, {t:'ThemeManager',c:'syn-type'}, {t:' {',c:'syn-punct'} ],
+    [ {t:'  #cache ',c:'syn-special'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'new',c:'syn-keyword'}, {t:' ',c:''}, {t:'Map',c:'syn-type'}, {t:'()',c:'syn-punct'} ],
+    [ {t:'  ',c:''} ],
+    [ {t:'  ',c:''}, {t:'constructor',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'theme ',c:'syn-parameter'}, {t:'=',c:'syn-operator'}, {t:' DEFAULT_THEME',c:'syn-constant'}, {t:')',c:'syn-punct'}, {t:' {',c:'syn-punct'} ],
+    [ {t:'    this',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'theme ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' theme',c:'syn-parameter'} ],
+    [ {t:'  }',c:'syn-punct'} ],
+    [ {t:'  ',c:''} ],
+    [ {t:'  ',c:''}, {t:'async',c:'syn-keyword'}, {t:' ',c:''}, {t:'load',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'name ',c:'syn-parameter'}, {t:'=',c:'syn-operator'}, {t:' this',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'theme',c:'syn-plain'}, {t:')',c:'syn-punct'}, {t:' {',c:'syn-punct'} ],
+    [ {t:'    ',c:''}, {t:'if',c:'syn-keyword'}, {t:' (',c:'syn-punct'}, {t:'!this',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'#cache',c:'syn-special'}, {t:'.',c:'syn-punct'}, {t:'has',c:'syn-function'}, {t:'(name)',c:'syn-plain'}, {t:')',c:'syn-punct'}, {t:' {',c:'syn-punct'} ],
+    [ {t:'      const',c:'syn-keyword'}, {t:' path ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'`./themes/${name}.json`',c:'syn-string'} ],
+    [ {t:'      const',c:'syn-keyword'}, {t:' data ',c:'syn-plain'}, {t:'=',c:'syn-operator'}, {t:' ',c:''}, {t:'await',c:'syn-keyword'}, {t:' ',c:''}, {t:'readFile',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'path',c:'syn-plain'}, {t:', ',c:'syn-plain'}, {t:"'utf8'",c:'syn-string'}, {t:')',c:'syn-punct'} ],
+    [ {t:'      this',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'#cache',c:'syn-special'}, {t:'.',c:'syn-punct'}, {t:'set',c:'syn-function'}, {t:'(',c:'syn-punct'}, {t:'name, ',c:'syn-plain'}, {t:'JSON',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'parse',c:'syn-function'}, {t:'(data)',c:'syn-plain'}, {t:')',c:'syn-punct'} ],
+    [ {t:'    }',c:'syn-punct'} ],
+    [ {t:'    ',c:''}, {t:'return',c:'syn-keyword'}, {t:' this',c:'syn-builtin'}, {t:'.',c:'syn-punct'}, {t:'#cache',c:'syn-special'}, {t:'.',c:'syn-punct'}, {t:'get',c:'syn-function'}, {t:'(name)',c:'syn-plain'} ],
+    [ {t:'  }',c:'syn-punct'} ],
+    // extra line to reach ~18-19
+  ]
+};
+
+// ─── App State ────────────────────────────────────────────────────────────────
+const state = {
+  palette: { ...PALETTE_PRESETS.catppuccin },
+  language: 'lua',
+  activeMode: 'n',
+  expandedHsl: new Set(),
+  expandedSections: new Set(['Editor UI', 'Syntax']),
+  activePreset: 'catppuccin',
+  exportTab: 'lua',
+};
+
+// ─── Color Utilities ──────────────────────────────────────────────────────────
+const ColorUtils = {
+  hexToHsl(hex) {
+    let r = parseInt(hex.slice(1,3),16)/255;
+    let g = parseInt(hex.slice(3,5),16)/255;
+    let b = parseInt(hex.slice(5,7),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h=0, s=0, l=(max+min)/2;
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max) {
+        case r: h=((g-b)/d+(g<b?6:0))/6; break;
+        case g: h=((b-r)/d+2)/6; break;
+        case b: h=((r-g)/d+4)/6; break;
+      }
+    }
+    return [Math.round(h*360), Math.round(s*100), Math.round(l*100)];
+  },
+
+  hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const k = n => (n+h/30)%12;
+    const a = s*Math.min(l,1-l);
+    const f = n => l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+    const toHex = x => Math.round(x*255).toString(16).padStart(2,'0');
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  },
+
+  updateSliderGradients(row, h, s, l) {
+    const hSlider = row.querySelector('.hsl-h');
+    const sSlider = row.querySelector('.hsl-s');
+    const lSlider = row.querySelector('.hsl-l');
+    if (!hSlider) return;
+    // Hue: full spectrum
+    hSlider.style.background = `linear-gradient(to right,
+      hsl(0,100%,50%), hsl(30,100%,50%), hsl(60,100%,50%), hsl(90,100%,50%),
+      hsl(120,100%,50%), hsl(150,100%,50%), hsl(180,100%,50%), hsl(210,100%,50%),
+      hsl(240,100%,50%), hsl(270,100%,50%), hsl(300,100%,50%), hsl(330,100%,50%), hsl(360,100%,50%))`;
+    // Saturation: gray → hue
+    sSlider.style.background = `linear-gradient(to right, hsl(${h},0%,${l}%), hsl(${h},100%,${l}%))`;
+    // Lightness: black → hue → white
+    lSlider.style.background = `linear-gradient(to right, hsl(${h},${s}%,0%), hsl(${h},${s}%,50%), hsl(${h},${s}%,100%))`;
+  }
+};
+
+// ─── Apply Theme ──────────────────────────────────────────────────────────────
+function applyTheme(presetName) {
+  const palette = PALETTE_PRESETS[presetName];
+  if (!palette) return;
+  state.palette = { ...palette };
+  state.activePreset = presetName;
+  for (const [key, val] of Object.entries(palette)) {
+    document.documentElement.style.setProperty(`--theme-${key}`, val);
+  }
+  // Update preset button states
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.preset === presetName);
+  });
+  // Re-render controls to sync
+  renderControls();
+  // Reapply current mode color with new palette values
+  if (typeof applyMode === 'function') applyMode(state.activeMode);
+}
+
+// ─── Update Single Color ──────────────────────────────────────────────────────
+function updateColor(varName, hex) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+  state.palette[varName] = hex;
+  state.activePreset = null;
+  document.documentElement.style.setProperty(`--theme-${varName}`, hex);
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+
+  // Sync all controls for this var without full re-render
+  const rows = document.querySelectorAll(`[data-var="${varName}"]`);
+  rows.forEach(row => {
+    const swatch = row.querySelector('.color-swatch');
+    const hexInput = row.querySelector('.hex-input');
+    const colorInput = row.querySelector('.color-input-hidden');
+    if (swatch) swatch.style.background = hex;
+    if (hexInput && document.activeElement !== hexInput) hexInput.value = hex.slice(1);
+    if (colorInput) colorInput.value = hex;
+
+    const [h,s,l] = ColorUtils.hexToHsl(hex);
+    const hSlider = row.querySelector('.hsl-h');
+    const sSlider = row.querySelector('.hsl-s');
+    const lSlider = row.querySelector('.hsl-l');
+    if (hSlider) { hSlider.value = h; row.querySelector('.hsl-h-val').textContent = h; }
+    if (sSlider) { sSlider.value = s; row.querySelector('.hsl-s-val').textContent = s; }
+    if (lSlider) { lSlider.value = l; row.querySelector('.hsl-l-val').textContent = l; }
+    ColorUtils.updateSliderGradients(row, h, s, l);
+  });
+
+  // If the changed var is the active mode's color key, update the statusline live
+  if (typeof MODE_CONFIG !== 'undefined' && MODE_CONFIG[state.activeMode]?.key === varName) {
+    document.documentElement.style.setProperty('--theme-sl-mode-current', hex);
+  }
+}
+
+// ─── Render Controls ─────────────────────────────────────────────────────────
+function renderControls() {
+  const container = document.getElementById('controls-body');
+  container.innerHTML = '';
+
+  const sections = [...new Set(SYNTAX_GROUPS.map(g => g.section))];
+  sections.forEach(sectionName => {
+    const groups = SYNTAX_GROUPS.filter(g => g.section === sectionName);
+    const isOpen = state.expandedSections.has(sectionName);
+
+    const sectionEl = document.createElement('div');
+    sectionEl.className = 'ctrl-section' + (isOpen ? ' open' : '');
+
+    const header = document.createElement('div');
+    header.className = 'ctrl-section-header';
+    header.innerHTML = `
+      <span class="ctrl-section-title">${sectionName}</span>
+      <span class="ctrl-section-arrow">▶</span>
+    `;
+    header.addEventListener('click', () => {
+      if (state.expandedSections.has(sectionName)) {
+        state.expandedSections.delete(sectionName);
+      } else {
+        state.expandedSections.add(sectionName);
+      }
+      sectionEl.classList.toggle('open');
+    });
+
+    const body = document.createElement('div');
+    body.className = 'ctrl-section-body';
+
+    groups.forEach(group => {
+      const hex = state.palette[group.varName] || '#000000';
+      const [h, s, l] = ColorUtils.hexToHsl(hex);
+      const hslKey = `${group.varName}`;
+      const hslOpen = state.expandedHsl.has(hslKey);
+
+      const wrap = document.createElement('div');
+      wrap.dataset.var = group.varName;
+
+      // Main row
+      const row = document.createElement('div');
+      row.className = 'color-row';
+
+      // Label
+      const label = document.createElement('span');
+      label.className = 'color-label';
+      label.textContent = group.label;
+
+      // Swatch + hidden color input
+      const swatchWrap = document.createElement('div');
+      swatchWrap.className = 'color-swatch-wrap';
+      const swatch = document.createElement('div');
+      swatch.className = 'color-swatch';
+      swatch.style.background = hex;
+      const colorInput = document.createElement('input');
+      colorInput.type = 'color';
+      colorInput.className = 'color-input-hidden';
+      colorInput.value = hex;
+      swatch.addEventListener('click', () => colorInput.click());
+      colorInput.addEventListener('input', e => updateColor(group.varName, e.target.value));
+      swatchWrap.appendChild(swatch);
+      swatchWrap.appendChild(colorInput);
+
+      // Hex input
+      const hexInput = document.createElement('input');
+      hexInput.type = 'text';
+      hexInput.className = 'hex-input';
+      hexInput.value = hex.slice(1);
+      hexInput.maxLength = 6;
+      hexInput.spellcheck = false;
+      hexInput.addEventListener('input', e => {
+        const v = e.target.value.replace(/[^0-9a-fA-F]/g,'');
+        e.target.value = v;
+        if (v.length === 6) updateColor(group.varName, '#' + v);
+      });
+      hexInput.addEventListener('focus', e => e.target.select());
+
+      // HSL toggle
+      const hslToggle = document.createElement('button');
+      hslToggle.className = 'hsl-toggle' + (hslOpen ? ' active' : '');
+      hslToggle.textContent = 'HSL';
+      hslToggle.addEventListener('click', () => {
+        const open = state.expandedHsl.has(hslKey);
+        if (open) { state.expandedHsl.delete(hslKey); hslToggle.classList.remove('active'); }
+        else { state.expandedHsl.add(hslKey); hslToggle.classList.add('active'); }
+        hslPanel.classList.toggle('open', !open);
+      });
+
+      row.appendChild(label);
+      row.appendChild(swatchWrap);
+      row.appendChild(hexInput);
+      row.appendChild(hslToggle);
+
+      // HSL panel
+      const hslPanel = document.createElement('div');
+      hslPanel.className = 'hsl-panel' + (hslOpen ? ' open' : '');
+
+      const sliders = [
+        { cls: 'hsl-h', valCls: 'hsl-h-val', letter: 'H', min: 0, max: 360, val: h },
+        { cls: 'hsl-s', valCls: 'hsl-s-val', letter: 'S', min: 0, max: 100, val: s },
+        { cls: 'hsl-l', valCls: 'hsl-l-val', letter: 'L', min: 0, max: 100, val: l },
+      ];
+
+      let currentH = h, currentS = s, currentL = l;
+      ColorUtils.updateSliderGradients({ querySelector: sel => hslPanel.querySelector(sel) }, h, s, l);
+
+      sliders.forEach(({ cls, valCls, letter, min, max, val }) => {
+        const hslRow = document.createElement('div');
+        hslRow.className = 'hsl-row';
+        const lbl = document.createElement('span');
+        lbl.className = 'hsl-label';
+        lbl.textContent = letter;
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = `hsl-slider ${cls}`;
+        slider.min = min; slider.max = max; slider.value = val;
+        const valDisplay = document.createElement('span');
+        valDisplay.className = `hsl-value ${valCls}`;
+        valDisplay.textContent = val;
+
+        slider.addEventListener('input', () => {
+          valDisplay.textContent = slider.value;
+          if (cls === 'hsl-h') currentH = +slider.value;
+          if (cls === 'hsl-s') currentS = +slider.value;
+          if (cls === 'hsl-l') currentL = +slider.value;
+          const newHex = ColorUtils.hslToHex(currentH, currentS, currentL);
+          updateColor(group.varName, newHex);
+          ColorUtils.updateSliderGradients({ querySelector: sel => hslPanel.querySelector(sel) }, currentH, currentS, currentL);
+        });
+
+        hslRow.appendChild(lbl);
+        hslRow.appendChild(slider);
+        hslRow.appendChild(valDisplay);
+        hslPanel.appendChild(hslRow);
+      });
+
+      // Set initial gradient backgrounds
+      setTimeout(() => {
+        ColorUtils.updateSliderGradients({ querySelector: sel => hslPanel.querySelector(sel) }, h, s, l);
+      }, 0);
+
+      wrap.appendChild(row);
+      wrap.appendChild(hslPanel);
+      body.appendChild(wrap);
+    });
+
+    sectionEl.appendChild(header);
+    sectionEl.appendChild(body);
+    container.appendChild(sectionEl);
+  });
+}
+
+// ─── Render Code ──────────────────────────────────────────────────────────────
+const ACTIVE_LINE = 5; // 1-indexed
+
+function renderCode(lang) {
+  const lines = SAMPLE_CODE[lang] || SAMPLE_CODE.lua;
+  const gutter = document.getElementById('nvim-gutter');
+  const code = document.getElementById('nvim-code');
+  gutter.innerHTML = '';
+  code.innerHTML = '';
+
+  lines.forEach((tokens, i) => {
+    const lineNum = i + 1;
+    const isActive = lineNum === ACTIVE_LINE;
+
+    // Gutter
+    const nr = document.createElement('div');
+    nr.className = 'line-nr' + (isActive ? ' active' : '');
+    nr.textContent = lineNum;
+    gutter.appendChild(nr);
+
+    // Code line
+    const lineEl = document.createElement('div');
+    lineEl.className = 'code-line' + (isActive ? ' cursor-line' : '');
+
+    tokens.forEach(({ t, c }) => {
+      if (!t) return;
+      if (c) {
+        const span = document.createElement('span');
+        span.className = c;
+        span.textContent = t;
+        lineEl.appendChild(span);
+      } else {
+        lineEl.appendChild(document.createTextNode(t));
+      }
+    });
+
+    // empty line needs height
+    if (tokens.length === 0 || (tokens.length === 1 && tokens[0].t === '')) {
+      lineEl.innerHTML = '&nbsp;';
+    }
+
+    code.appendChild(lineEl);
+  });
+
+  // Re-append pmenu after re-render
+  const pmenu = document.getElementById('nvim-pmenu');
+  if (pmenu) code.appendChild(pmenu);
+}
+
+// ─── Export Generators ────────────────────────────────────────────────────────
+function generateLua() {
+  const p = state.palette;
+
+  // 'function' is a reserved keyword in Lua — use 'fn' as the key name
+  const luaKey = (k) => { const s = k.replace(/-/g, '_'); return s === 'function' ? 'fn' : s; };
+  const c = (k) => `c.${luaKey(k)}`;
+
+  const colorLines = Object.entries(p)
+    .map(([k, v]) => `  ${luaKey(k).padEnd(20)} = "${v}",`)
+    .join('\n');
+
+  return `-- Generated by nvim theme creator
+--
+-- INSTALL:
+--
+-- 1. Save this file to:
+--      ~/.config/nvim/colors/mytheme.lua
+--
+-- 2. Export the "Lualine theme" tab and save it to:
+--      ~/.config/nvim/lua/lualine/themes/mytheme.lua
+--    (create the directory: mkdir -p ~/.config/nvim/lua/lualine/themes)
+--
+-- 3. Create ~/.config/nvim/lua/plugins/colorscheme.lua with:
+--      return {
+--        { "LazyVim/LazyVim", opts = { colorscheme = "mytheme" } },
+--      }
+--
+-- 4. Restart Neovim.
+
+vim.cmd("highlight clear")
+if vim.fn.exists("syntax_on") == 1 then vim.cmd("syntax reset") end
+vim.g.colors_name = "mytheme"
+vim.opt.termguicolors = true
+
+local c = {
+${colorLines}
+}
+
+-- ── Editor ───────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "Normal",          { fg = ${c('fg')},               bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "NormalNC",        { fg = ${c('fg')},               bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "NormalFloat",     { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "FloatBorder",     { fg = ${c('float-border')},     bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "FloatTitle",      { fg = ${c('float-border')},     bg = ${c('float-bg')},  bold = true })
+vim.api.nvim_set_hl(0, "CursorLine",      { bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "CursorLineNr",    { fg = ${c('line-nr-active')},   bold = true })
+vim.api.nvim_set_hl(0, "LineNr",          { fg = ${c('line-nr')} })
+vim.api.nvim_set_hl(0, "SignColumn",      { fg = ${c('line-nr')},          bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "FoldColumn",      { fg = ${c('line-nr')},          bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "Folded",          { fg = ${c('comment')},          bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "Visual",          { bg = ${c('selection')} })
+vim.api.nvim_set_hl(0, "Search",          { fg = ${c('bg')},               bg = ${c('keyword')} })
+vim.api.nvim_set_hl(0, "IncSearch",       { fg = ${c('bg')},               bg = ${c('string')} })
+vim.api.nvim_set_hl(0, "CurSearch",       { fg = ${c('bg')},               bg = ${c('special')} })
+vim.api.nvim_set_hl(0, "Substitute",      { fg = ${c('bg')},               bg = ${c('error')} })
+vim.api.nvim_set_hl(0, "MatchParen",      { fg = ${c('special')},          bold = true, underline = true })
+vim.api.nvim_set_hl(0, "NonText",         { fg = ${c('line-nr')} })
+vim.api.nvim_set_hl(0, "EndOfBuffer",     { fg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "Whitespace",      { fg = ${c('border')} })
+vim.api.nvim_set_hl(0, "SpecialKey",      { fg = ${c('line-nr')} })
+vim.api.nvim_set_hl(0, "Conceal",         { fg = ${c('comment')} })
+vim.api.nvim_set_hl(0, "Directory",       { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "Title",           { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "Question",        { fg = ${c('string')} })
+vim.api.nvim_set_hl(0, "MoreMsg",         { fg = ${c('string')} })
+vim.api.nvim_set_hl(0, "MsgArea",         { fg = ${c('fg')},               bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "ErrorMsg",        { fg = ${c('error')} })
+vim.api.nvim_set_hl(0, "WarningMsg",      { fg = ${c('warning')} })
+vim.api.nvim_set_hl(0, "WildMenu",        { fg = ${c('fg')},               bg = ${c('selection')} })
+
+-- ── Chrome ───────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "StatusLine",      { fg = ${c('sl-fg')},            bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "StatusLineNC",    { fg = ${c('line-nr')},          bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "TabLine",         { fg = ${c('tabline-fg')},       bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "TabLineSel",      { fg = ${c('tabline-active-fg')}, bg = ${c('tabline-active-bg')}, bold = true })
+vim.api.nvim_set_hl(0, "TabLineFill",     { bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "WinSeparator",    { fg = ${c('border')} })
+vim.api.nvim_set_hl(0, "VertSplit",       { fg = ${c('border')} })
+vim.api.nvim_set_hl(0, "Pmenu",           { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "PmenuSel",        { fg = ${c('fg')},               bg = ${c('pmenu-sel')},  bold = true })
+vim.api.nvim_set_hl(0, "PmenuSbar",       { bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "PmenuThumb",      { bg = ${c('line-nr')} })
+
+-- ── Diffs ────────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "DiffAdd",         { fg = ${c('string')},           bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "DiffChange",      { fg = ${c('warning')},          bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "DiffDelete",      { fg = ${c('error')},            bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "DiffText",        { fg = ${c('bg')},               bg = ${c('warning')} })
+
+-- ── Diagnostics ──────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "DiagnosticError",              { fg = ${c('error')} })
+vim.api.nvim_set_hl(0, "DiagnosticWarn",               { fg = ${c('warning')} })
+vim.api.nvim_set_hl(0, "DiagnosticInfo",               { fg = ${c('info')} })
+vim.api.nvim_set_hl(0, "DiagnosticHint",               { fg = ${c('hint')} })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineError",     { undercurl = true, sp = ${c('error')} })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineWarn",      { undercurl = true, sp = ${c('warning')} })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineInfo",      { undercurl = true, sp = ${c('info')} })
+vim.api.nvim_set_hl(0, "DiagnosticUnderlineHint",      { undercurl = true, sp = ${c('hint')} })
+vim.api.nvim_set_hl(0, "DiagnosticVirtualTextError",   { fg = ${c('error')},   bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "DiagnosticVirtualTextWarn",    { fg = ${c('warning')}, bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "DiagnosticVirtualTextInfo",    { fg = ${c('info')},    bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "DiagnosticVirtualTextHint",    { fg = ${c('hint')},    bg = ${c('bg')} })
+
+-- ── Syntax ───────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "Comment",         { fg = ${c('comment')},          italic = true })
+vim.api.nvim_set_hl(0, "Keyword",         { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "Statement",       { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "Conditional",     { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "Repeat",          { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "Exception",       { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "String",          { fg = ${c('string')} })
+vim.api.nvim_set_hl(0, "Character",       { fg = ${c('string')} })
+vim.api.nvim_set_hl(0, "Function",        { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "Identifier",      { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "Type",            { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "StorageClass",    { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "Structure",       { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "Typedef",         { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "Constant",        { fg = ${c('constant')} })
+vim.api.nvim_set_hl(0, "Boolean",         { fg = ${c('constant')} })
+vim.api.nvim_set_hl(0, "Number",          { fg = ${c('number')} })
+vim.api.nvim_set_hl(0, "Float",           { fg = ${c('number')} })
+vim.api.nvim_set_hl(0, "Operator",        { fg = ${c('operator')} })
+vim.api.nvim_set_hl(0, "Delimiter",       { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "Special",         { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "SpecialChar",     { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "Tag",             { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "PreProc",         { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "Include",         { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "Define",          { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "Macro",           { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "Error",           { fg = ${c('error')} })
+vim.api.nvim_set_hl(0, "Todo",            { fg = ${c('bg')},               bg = ${c('warning')},   bold = true })
+vim.api.nvim_set_hl(0, "Underlined",      { underline = true })
+
+-- ── Treesitter ───────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "@comment",                { link = "Comment" })
+vim.api.nvim_set_hl(0, "@keyword",                { link = "Keyword" })
+vim.api.nvim_set_hl(0, "@keyword.function",       { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "@keyword.return",         { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "@keyword.operator",       { fg = ${c('operator')} })
+vim.api.nvim_set_hl(0, "@conditional",            { link = "Conditional" })
+vim.api.nvim_set_hl(0, "@repeat",                 { link = "Repeat" })
+vim.api.nvim_set_hl(0, "@string",                 { link = "String" })
+vim.api.nvim_set_hl(0, "@string.escape",          { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "@string.special",         { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "@string.regexp",          { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "@character",              { link = "Character" })
+vim.api.nvim_set_hl(0, "@number",                 { link = "Number" })
+vim.api.nvim_set_hl(0, "@float",                  { link = "Float" })
+vim.api.nvim_set_hl(0, "@boolean",                { link = "Boolean" })
+vim.api.nvim_set_hl(0, "@function",               { link = "Function" })
+vim.api.nvim_set_hl(0, "@function.builtin",       { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "@function.call",          { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "@method",                 { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "@method.call",            { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "@constructor",            { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "@type",                   { link = "Type" })
+vim.api.nvim_set_hl(0, "@type.builtin",           { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "@type.definition",        { fg = ${c('type')},             bold = true })
+vim.api.nvim_set_hl(0, "@constant",               { link = "Constant" })
+vim.api.nvim_set_hl(0, "@constant.builtin",       { fg = ${c('constant')},         bold = true })
+vim.api.nvim_set_hl(0, "@constant.macro",         { fg = ${c('constant')} })
+vim.api.nvim_set_hl(0, "@operator",               { link = "Operator" })
+vim.api.nvim_set_hl(0, "@variable",               { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "@variable.builtin",       { fg = ${c('builtin')} })
+vim.api.nvim_set_hl(0, "@variable.parameter",     { fg = ${c('parameter')} })
+vim.api.nvim_set_hl(0, "@variable.member",        { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "@field",                  { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "@property",               { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "@namespace",              { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "@module",                 { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "@punctuation.bracket",    { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "@punctuation.delimiter",  { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "@punctuation.special",    { fg = ${c('special')} })
+vim.api.nvim_set_hl(0, "@tag",                    { fg = ${c('keyword')} })
+vim.api.nvim_set_hl(0, "@tag.attribute",          { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "@tag.delimiter",          { fg = ${c('fg')} })
+
+-- ── Telescope ────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "TelescopeNormal",         { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "TelescopeBorder",         { fg = ${c('float-border')},     bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "TelescopePromptNormal",   { fg = ${c('fg')},               bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "TelescopePromptBorder",   { fg = ${c('cursor-line')},      bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "TelescopePromptTitle",    { fg = ${c('bg')},               bg = ${c('keyword')},    bold = true })
+vim.api.nvim_set_hl(0, "TelescopePreviewTitle",   { fg = ${c('bg')},               bg = ${c('string')},     bold = true })
+vim.api.nvim_set_hl(0, "TelescopeResultsTitle",   { fg = ${c('bg')},               bg = ${c('float-border')}, bold = true })
+vim.api.nvim_set_hl(0, "TelescopeSelection",      { fg = ${c('fg')},               bg = ${c('selection')} })
+vim.api.nvim_set_hl(0, "TelescopeSelectionCaret", { fg = ${c('keyword')} })
+vim.api.nvim_set_hl(0, "TelescopeMatching",       { fg = ${c('keyword')},          bold = true })
+
+-- ── GitSigns ─────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "GitSignsAdd",             { fg = ${c('string')} })
+vim.api.nvim_set_hl(0, "GitSignsChange",          { fg = ${c('warning')} })
+vim.api.nvim_set_hl(0, "GitSignsDelete",          { fg = ${c('error')} })
+vim.api.nvim_set_hl(0, "GitSignsCurrentLineBlame",{ fg = ${c('line-nr')},          italic = true })
+
+-- ── Which-key ────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "WhichKey",                { fg = ${c('keyword')} })
+vim.api.nvim_set_hl(0, "WhichKeyGroup",           { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "WhichKeyDesc",            { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "WhichKeyBorder",          { fg = ${c('float-border')},     bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "WhichKeyFloat",           { bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "WhichKeyValue",           { fg = ${c('comment')} })
+
+-- ── Indent Blankline (v3) ─────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "IblIndent",               { fg = ${c('border')} })
+vim.api.nvim_set_hl(0, "IblScope",                { fg = ${c('line-nr')} })
+vim.api.nvim_set_hl(0, "IndentBlanklineChar",      { fg = ${c('border')} })
+
+-- ── nvim-cmp ─────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "CmpItemAbbr",             { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "CmpItemAbbrDeprecated",   { fg = ${c('line-nr')},          strikethrough = true })
+vim.api.nvim_set_hl(0, "CmpItemAbbrMatch",        { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "CmpItemAbbrMatchFuzzy",   { fg = ${c('keyword')},          bold = true })
+vim.api.nvim_set_hl(0, "CmpItemMenu",             { fg = ${c('comment')},          italic = true })
+vim.api.nvim_set_hl(0, "CmpItemKindDefault",      { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "CmpItemKindFunction",     { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "CmpItemKindMethod",       { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "CmpItemKindVariable",     { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "CmpItemKindField",        { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "CmpItemKindKeyword",      { fg = ${c('keyword')} })
+vim.api.nvim_set_hl(0, "CmpItemKindConstant",     { fg = ${c('constant')} })
+vim.api.nvim_set_hl(0, "CmpItemKindClass",        { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "CmpItemKindInterface",    { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "CmpItemKindModule",       { fg = ${c('type')} })
+vim.api.nvim_set_hl(0, "CmpItemKindSnippet",      { fg = ${c('special')} })
+
+-- ── Neo-tree ─────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "NeoTreeNormal",           { fg = ${c('fg')},               bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "NeoTreeNormalNC",         { fg = ${c('fg')},               bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "NeoTreeBorder",           { fg = ${c('border')},           bg = ${c('bg')} })
+vim.api.nvim_set_hl(0, "NeoTreeDirectoryIcon",    { fg = ${c('function')} })
+vim.api.nvim_set_hl(0, "NeoTreeDirectoryName",    { fg = ${c('fg')},               bold = true })
+vim.api.nvim_set_hl(0, "NeoTreeFileName",         { fg = ${c('fg')} })
+vim.api.nvim_set_hl(0, "NeoTreeGitAdded",         { fg = ${c('string')} })
+vim.api.nvim_set_hl(0, "NeoTreeGitModified",      { fg = ${c('warning')} })
+vim.api.nvim_set_hl(0, "NeoTreeGitDeleted",       { fg = ${c('error')} })
+
+-- ── Noice / Notify ───────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "NoicePopup",              { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "NoicePopupBorder",        { fg = ${c('float-border')},     bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "NoiceCmdlinePopup",       { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "NoiceCmdlinePopupBorder", { fg = ${c('float-border')} })
+vim.api.nvim_set_hl(0, "NoiceMini",               { fg = ${c('fg')},               bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "NotifyERRORBorder",       { fg = ${c('error')} })
+vim.api.nvim_set_hl(0, "NotifyWARNBorder",        { fg = ${c('warning')} })
+vim.api.nvim_set_hl(0, "NotifyINFOBorder",        { fg = ${c('info')} })
+vim.api.nvim_set_hl(0, "NotifyERRORTitle",        { fg = ${c('error')},            bold = true })
+vim.api.nvim_set_hl(0, "NotifyWARNTitle",         { fg = ${c('warning')},          bold = true })
+vim.api.nvim_set_hl(0, "NotifyINFOTitle",         { fg = ${c('info')},             bold = true })
+vim.api.nvim_set_hl(0, "NotifyERRORBody",         { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "NotifyWARNBody",          { fg = ${c('fg')},               bg = ${c('float-bg')} })
+vim.api.nvim_set_hl(0, "NotifyINFOBody",          { fg = ${c('fg')},               bg = ${c('float-bg')} })
+
+-- ── Flash ────────────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "FlashBackdrop",           { fg = ${c('comment')} })
+vim.api.nvim_set_hl(0, "FlashLabel",              { fg = ${c('bg')},               bg = ${c('special')},    bold = true })
+vim.api.nvim_set_hl(0, "FlashMatch",              { fg = ${c('bg')},               bg = ${c('keyword')} })
+vim.api.nvim_set_hl(0, "FlashCurrent",            { fg = ${c('bg')},               bg = ${c('string')} })
+
+-- ── Lualine ──────────────────────────────────────────────────────────────────
+-- lualine_a: mode badge (colored background, dark text)
+vim.api.nvim_set_hl(0, "lualine_a_normal",            { fg = ${c('sl-bg')}, bg = ${c('sl-mode-n')}, bold = true })
+vim.api.nvim_set_hl(0, "lualine_a_insert",            { fg = ${c('sl-bg')}, bg = ${c('sl-mode-i')}, bold = true })
+vim.api.nvim_set_hl(0, "lualine_a_visual",            { fg = ${c('sl-bg')}, bg = ${c('sl-mode-v')}, bold = true })
+vim.api.nvim_set_hl(0, "lualine_a_command",           { fg = ${c('sl-bg')}, bg = ${c('sl-mode-c')}, bold = true })
+vim.api.nvim_set_hl(0, "lualine_a_terminal",          { fg = ${c('sl-bg')}, bg = ${c('sl-mode-t')}, bold = true })
+vim.api.nvim_set_hl(0, "lualine_a_replace",           { fg = ${c('sl-bg')}, bg = ${c('error')},     bold = true })
+vim.api.nvim_set_hl(0, "lualine_a_inactive",          { fg = ${c('line-nr')}, bg = ${c('sl-bg')} })
+-- lualine_b: branch / diff section
+vim.api.nvim_set_hl(0, "lualine_b_normal",            { fg = ${c('sl-fg')}, bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "lualine_b_insert",            { fg = ${c('sl-fg')}, bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "lualine_b_visual",            { fg = ${c('sl-fg')}, bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "lualine_b_command",           { fg = ${c('sl-fg')}, bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "lualine_b_terminal",          { fg = ${c('sl-fg')}, bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "lualine_b_replace",           { fg = ${c('sl-fg')}, bg = ${c('cursor-line')} })
+vim.api.nvim_set_hl(0, "lualine_b_inactive",          { fg = ${c('line-nr')}, bg = ${c('sl-bg')} })
+-- lualine_c: filename / middle section
+vim.api.nvim_set_hl(0, "lualine_c_normal",            { fg = ${c('sl-fg')}, bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "lualine_c_insert",            { fg = ${c('sl-fg')}, bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "lualine_c_visual",            { fg = ${c('sl-fg')}, bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "lualine_c_command",           { fg = ${c('sl-fg')}, bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "lualine_c_terminal",          { fg = ${c('sl-fg')}, bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "lualine_c_replace",           { fg = ${c('sl-fg')}, bg = ${c('sl-bg')} })
+vim.api.nvim_set_hl(0, "lualine_c_inactive",          { fg = ${c('line-nr')}, bg = ${c('sl-bg')} })
+
+-- ── BufferLine ───────────────────────────────────────────────────────────────
+vim.api.nvim_set_hl(0, "BufferLineFill",                    { bg = ${c('tabline-bg')} })
+-- Inactive tabs
+vim.api.nvim_set_hl(0, "BufferLineBackground",              { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineBuffer",                  { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineSeparator",               { fg = ${c('border')},            bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineCloseButton",             { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineModified",                { fg = ${c('warning')},           bg = ${c('tabline-bg')} })
+-- Visible (open but not active) tabs
+vim.api.nvim_set_hl(0, "BufferLineBufferVisible",           { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineSeparatorVisible",        { fg = ${c('border')},            bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineCloseButtonVisible",      { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineModifiedVisible",         { fg = ${c('warning')},           bg = ${c('tabline-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineIndicatorVisible",        { fg = ${c('tabline-bg')} })
+-- Selected (active) tab
+vim.api.nvim_set_hl(0, "BufferLineBufferSelected",          { fg = ${c('tabline-active-fg')}, bg = ${c('tabline-active-bg')}, bold = true })
+vim.api.nvim_set_hl(0, "BufferLineSeparatorSelected",       { fg = ${c('border')},            bg = ${c('tabline-active-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineCloseButtonSelected",     { fg = ${c('tabline-active-fg')}, bg = ${c('tabline-active-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineModifiedSelected",        { fg = ${c('warning')},           bg = ${c('tabline-active-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineIndicatorSelected",       { fg = ${c('keyword')},           bg = ${c('tabline-active-bg')} })
+vim.api.nvim_set_hl(0, "BufferLineDuplicate",               { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')},  italic = true })
+vim.api.nvim_set_hl(0, "BufferLineDuplicateSelected",       { fg = ${c('tabline-active-fg')}, bg = ${c('tabline-active-bg')}, italic = true })
+vim.api.nvim_set_hl(0, "BufferLineDuplicateVisible",        { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')},  italic = true })
+vim.api.nvim_set_hl(0, "BufferLineOffset",                  { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')},  bold = true })
+vim.api.nvim_set_hl(0, "BufferLineTrunc",                   { fg = ${c('tabline-fg')},        bg = ${c('tabline-bg')} })
+
+-- Fix nvim-web-devicons icon backgrounds inside bufferline tabs.
+-- DevIcon* groups carry their own bg (set by nvim-web-devicons) which won't
+-- match the tab bg, causing a visible color gap around every file icon.
+-- This autocmd strips the bg from all DevIcon groups after plugins load.
+vim.api.nvim_create_autocmd("User", {
+  pattern = { "LazyVimStarted", "VeryLazy" },
+  once = true,
+  callback = function()
+    vim.defer_fn(function()
+      for _, name in ipairs(vim.fn.getcompletion("DevIcon", "highlight")) do
+        local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+        if ok and hl and hl.bg then
+          hl.bg = nil
+          pcall(vim.api.nvim_set_hl, 0, name, hl)
+        end
+      end
+    end, 100)
+  end,
+})`;
+}
+
+function generateLualine() {
+  const p = state.palette;
+  const luaKey = (k) => { const s = k.replace(/-/g, '_'); return s === 'function' ? 'fn' : s; };
+  const hex = (k) => `"${p[k]}"`;
+
+  return `-- Generated by nvim theme creator
+-- Save to: ~/.config/nvim/lua/lualine/themes/mytheme.lua
+--
+-- Lualine picks this up automatically when theme = "auto" (the LazyVim default)
+-- because it tries require('lualine.themes.<colors_name>') on startup.
+-- No extra config needed — just having this file in the right place is enough.
+
+local c = {
+  bg           = ${hex('bg')},
+  sl_bg        = ${hex('sl-bg')},
+  sl_fg        = ${hex('sl-fg')},
+  cursor_line  = ${hex('cursor-line')},
+  line_nr      = ${hex('line-nr')},
+  mode_n       = ${hex('sl-mode-n')},
+  mode_i       = ${hex('sl-mode-i')},
+  mode_v       = ${hex('sl-mode-v')},
+  mode_c       = ${hex('sl-mode-c')},
+  mode_t       = ${hex('sl-mode-t')},
+  error        = ${hex('error')},
+}
+
+-- Section backgrounds:
+--   a = mode badge  (colored, bold)
+--   b = branch/diff (slightly elevated surface)
+--   c = filename    (flat statusline bg)
+local theme = {
+  normal = {
+    a = { fg = c.sl_bg,   bg = c.mode_n,      gui = "bold" },
+    b = { fg = c.sl_fg,   bg = c.cursor_line },
+    c = { fg = c.sl_fg,   bg = c.sl_bg },
+  },
+  insert = {
+    a = { fg = c.sl_bg,   bg = c.mode_i,      gui = "bold" },
+    b = { fg = c.sl_fg,   bg = c.cursor_line },
+    c = { fg = c.sl_fg,   bg = c.sl_bg },
+  },
+  visual = {
+    a = { fg = c.sl_bg,   bg = c.mode_v,      gui = "bold" },
+    b = { fg = c.sl_fg,   bg = c.cursor_line },
+    c = { fg = c.sl_fg,   bg = c.sl_bg },
+  },
+  replace = {
+    a = { fg = c.sl_bg,   bg = c.error,       gui = "bold" },
+    b = { fg = c.sl_fg,   bg = c.cursor_line },
+    c = { fg = c.sl_fg,   bg = c.sl_bg },
+  },
+  command = {
+    a = { fg = c.sl_bg,   bg = c.mode_c,      gui = "bold" },
+    b = { fg = c.sl_fg,   bg = c.cursor_line },
+    c = { fg = c.sl_fg,   bg = c.sl_bg },
+  },
+  terminal = {
+    a = { fg = c.sl_bg,   bg = c.mode_t,      gui = "bold" },
+    b = { fg = c.sl_fg,   bg = c.cursor_line },
+    c = { fg = c.sl_fg,   bg = c.sl_bg },
+  },
+  inactive = {
+    a = { fg = c.line_nr, bg = c.sl_bg },
+    b = { fg = c.line_nr, bg = c.sl_bg },
+    c = { fg = c.line_nr, bg = c.sl_bg },
+  },
+}
+
+return theme`;
+}
+
+function generateVimscript() {
+  const p = state.palette;
+  const lpad = (s, n) => s.padEnd(n);
+  const hl = (group, fg, bg, extra='') => {
+    let line = `hi ${lpad(group, 32)}`;
+    if (fg) line += ` guifg=${fg}`;
+    if (bg) line += ` guibg=${bg}`;
+    if (extra) line += ` ${extra}`;
+    return line;
+  };
+  return [
+    '" Generated by nvim theme creator',
+    '" Save to: ~/.config/nvim/colors/mytheme.vim',
+    '"',
+    '" To activate in LazyVim, add to lua/plugins/colorscheme.lua:',
+    '"   return {',
+    '"     { "LazyVim/LazyVim", opts = { colorscheme = "mytheme" } },',
+    '"   }',
+    '',
+    'highlight clear',
+    'if exists("syntax_on") | syntax reset | endif',
+    'let g:colors_name = "mytheme"',
+    'set termguicolors',
+    '',
+    '" ── Editor ──────────────────────────────────────────────────────────────',
+    hl('Normal',          p.fg,                   p.bg),
+    hl('NormalNC',        p.fg,                   p.bg),
+    hl('NormalFloat',     p.fg,                   p['float-bg']),
+    hl('FloatBorder',     p['float-border'],       p['float-bg']),
+    hl('CursorLine',      null,                   p['cursor-line']),
+    hl('CursorLineNr',    p['line-nr-active'],     null, 'gui=bold'),
+    hl('LineNr',          p['line-nr']),
+    hl('SignColumn',      p['line-nr'],            p.bg),
+    hl('Visual',          null,                   p.selection),
+    hl('Search',          p.bg,                   p.keyword),
+    hl('IncSearch',       p.bg,                   p.string),
+    hl('CurSearch',       p.bg,                   p.special),
+    hl('MatchParen',      p.special,               null, 'gui=bold,underline'),
+    hl('NonText',         p['line-nr']),
+    hl('EndOfBuffer',     p.bg),
+    hl('Directory',       p.function),
+    hl('Title',           p.keyword,               null, 'gui=bold'),
+    hl('ErrorMsg',        p.error),
+    hl('WarningMsg',      p.warning),
+    '',
+    '" ── Chrome ─────────────────────────────────────────────────────────────',
+    hl('StatusLine',      p['sl-fg'],              p['sl-bg']),
+    hl('StatusLineNC',    p['line-nr'],            p['sl-bg']),
+    hl('TabLine',         p['tabline-fg'],         p['tabline-bg']),
+    hl('TabLineSel',      p['tabline-active-fg'],  p['tabline-active-bg'], 'gui=bold'),
+    hl('TabLineFill',     null,                   p['tabline-bg']),
+    hl('WinSeparator',    p.border),
+    hl('VertSplit',       p.border),
+    hl('Pmenu',           p.fg,                   p['float-bg']),
+    hl('PmenuSel',        p.fg,                   p['pmenu-sel'], 'gui=bold'),
+    '',
+    '" ── Diagnostics ────────────────────────────────────────────────────────',
+    hl('DiagnosticError', p.error),
+    hl('DiagnosticWarn',  p.warning),
+    hl('DiagnosticInfo',  p.info),
+    hl('DiagnosticHint',  p.hint),
+    '',
+    '" ── Syntax ─────────────────────────────────────────────────────────────',
+    hl('Comment',         p.comment,               null, 'gui=italic'),
+    hl('Keyword',         p.keyword,               null, 'gui=bold'),
+    hl('Conditional',     p.keyword,               null, 'gui=bold'),
+    hl('Repeat',          p.keyword,               null, 'gui=bold'),
+    hl('Exception',       p.keyword,               null, 'gui=bold'),
+    hl('String',          p.string),
+    hl('Character',       p.string),
+    hl('Function',        p.function),
+    hl('Identifier',      p.fg),
+    hl('Type',            p.type),
+    hl('StorageClass',    p.type),
+    hl('Constant',        p.constant),
+    hl('Boolean',         p.constant),
+    hl('Number',          p.number),
+    hl('Float',           p.number),
+    hl('Operator',        p.operator),
+    hl('Special',         p.special),
+    hl('SpecialChar',     p.special),
+    hl('PreProc',         p.builtin),
+    hl('Include',         p.builtin),
+    hl('Define',          p.builtin),
+    hl('Error',           p.error),
+    hl('Todo',            p.bg,                    p.warning, 'gui=bold'),
+    '',
+    '" ── Diffs ──────────────────────────────────────────────────────────────',
+    hl('DiffAdd',         p.string,                p.bg),
+    hl('DiffChange',      p.warning,               p.bg),
+    hl('DiffDelete',      p.error,                 p.bg),
+    hl('DiffText',        p.bg,                    p.warning),
+    '',
+    '" ── GitSigns ───────────────────────────────────────────────────────────',
+    hl('GitSignsAdd',     p.string),
+    hl('GitSignsChange',  p.warning),
+    hl('GitSignsDelete',  p.error),
+    '',
+    '" ── BufferLine ─────────────────────────────────────────────────────────',
+    hl('BufferLineFill',                 null,                   p['tabline-bg']),
+    hl('BufferLineBackground',           p['tabline-fg'],        p['tabline-bg']),
+    hl('BufferLineBuffer',               p['tabline-fg'],        p['tabline-bg']),
+    hl('BufferLineSeparator',            p.border,               p['tabline-bg']),
+    hl('BufferLineCloseButton',          p['tabline-fg'],        p['tabline-bg']),
+    hl('BufferLineModified',             p.warning,              p['tabline-bg']),
+    hl('BufferLineBufferVisible',        p['tabline-fg'],        p['tabline-bg']),
+    hl('BufferLineSeparatorVisible',     p.border,               p['tabline-bg']),
+    hl('BufferLineCloseButtonVisible',   p['tabline-fg'],        p['tabline-bg']),
+    hl('BufferLineModifiedVisible',      p.warning,              p['tabline-bg']),
+    hl('BufferLineBufferSelected',       p['tabline-active-fg'], p['tabline-active-bg'], 'gui=bold'),
+    hl('BufferLineSeparatorSelected',    p.border,               p['tabline-active-bg']),
+    hl('BufferLineCloseButtonSelected',  p['tabline-active-fg'], p['tabline-active-bg']),
+    hl('BufferLineModifiedSelected',     p.warning,              p['tabline-active-bg']),
+    hl('BufferLineIndicatorSelected',    p.keyword,              p['tabline-active-bg']),
+  ].join('\n');
+}
+
+// ─── Event Wiring ─────────────────────────────────────────────────────────────
+
+// Preset buttons
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyTheme(btn.dataset.preset));
+});
+
+// Language tabs
+document.querySelectorAll('.lang-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.language = btn.dataset.lang;
+    document.querySelectorAll('.lang-tab').forEach(b => b.classList.toggle('active', b.dataset.lang === state.language));
+    renderCode(state.language);
+  });
+});
+
+// Mode tabs
+const MODE_CONFIG = {
+  n: { label: 'NORMAL',   key: 'sl-mode-n', visual: false },
+  i: { label: 'INSERT',   key: 'sl-mode-i', visual: false },
+  v: { label: 'VISUAL',   key: 'sl-mode-v', visual: true  },
+  c: { label: 'COMMAND',  key: 'sl-mode-c', visual: false },
+  t: { label: 'TERMINAL', key: 'sl-mode-t', visual: false },
+};
+
+function applyMode(mode) {
+  const cfg = MODE_CONFIG[mode];
+  // Resolve the actual hex color directly from state — avoids var() resolution issues
+  const color = state.palette[cfg.key];
+  if (color) document.documentElement.style.setProperty('--theme-sl-mode-current', color);
+  // Update mode badge text
+  document.querySelector('.sl-mode').textContent = cfg.label;
+  // Toggle visual selection lines
+  document.querySelectorAll('.code-line').forEach((el, i) => {
+    el.classList.toggle('visual-line', cfg.visual && i >= 2 && i <= 5);
+  });
+  document.querySelectorAll('.line-nr').forEach((el, i) => {
+    el.classList.toggle('visual', cfg.visual && i >= 2 && i <= 5);
+  });
+  // Update active tab styling
+  document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  state.activeMode = mode;
+}
+
+document.querySelectorAll('.mode-tab').forEach(btn => {
+  btn.addEventListener('click', () => applyMode(btn.dataset.mode));
+});
+
+// Export button
+document.getElementById('export-btn').addEventListener('click', () => {
+  const backdrop = document.getElementById('modal-backdrop');
+  backdrop.classList.add('open');
+  updateExportOutput();
+});
+
+// Modal close
+document.getElementById('modal-close-btn').addEventListener('click', () => {
+  document.getElementById('modal-backdrop').classList.remove('open');
+});
+document.getElementById('modal-backdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-backdrop')) {
+    document.getElementById('modal-backdrop').classList.remove('open');
+  }
+});
+
+// Export tabs
+document.querySelectorAll('.modal-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.exportTab = btn.dataset.export;
+    document.querySelectorAll('.modal-tab').forEach(b => b.classList.toggle('active', b.dataset.export === state.exportTab));
+    updateExportOutput();
+  });
+});
+
+// Copy button
+document.getElementById('copy-btn').addEventListener('click', () => {
+  const output = document.getElementById('export-output');
+  navigator.clipboard.writeText(output.value).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const hint = document.getElementById('copy-hint');
+    const prev = btn.textContent;
+    btn.textContent = 'Copied!';
+    hint.textContent = '✓ Copied to clipboard';
+    setTimeout(() => {
+      btn.textContent = prev;
+      hint.textContent = EXPORT_HINTS[state.exportTab] || '';
+    }, 2000);
+  });
+});
+
+const EXPORT_HINTS = {
+  lua:     '~/.config/nvim/colors/mytheme.lua',
+  lualine: '~/.config/nvim/lua/lualine/themes/mytheme.lua',
+  vim:     '~/.config/nvim/colors/mytheme.vim',
+};
+
+function updateExportOutput() {
+  const output = document.getElementById('export-output');
+  if (state.exportTab === 'lua')         output.value = generateLua();
+  else if (state.exportTab === 'lualine') output.value = generateLualine();
+  else                                    output.value = generateVimscript();
+  document.getElementById('copy-hint').textContent = EXPORT_HINTS[state.exportTab] || '';
+}
+
+// Keyboard: Escape closes modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modal-backdrop').classList.remove('open');
+  }
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderControls();
+renderCode('lua');
+
+// Apply defaults from CSS (already set in :root, but init state)
+for (const [k, v] of Object.entries(PALETTE_PRESETS.catppuccin)) {
+  document.documentElement.style.setProperty(`--theme-${k}`, v);
+}
+applyMode('n');
+</script>
+</body>
+</html>
