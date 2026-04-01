@@ -2,7 +2,7 @@
 
 A browser-based tool for designing custom Neovim colorschemes with a live preview. No installs, no build step — just open and create.
 
-**[Live Demo →](https://sudominds.github.io/neovim-theme-creator/)**
+**[Live Demo →](https://sudominds.github.io/sm-neovim-theme-creator/)**
 
 ---
 
